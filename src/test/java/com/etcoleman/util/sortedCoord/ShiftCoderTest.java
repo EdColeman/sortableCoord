@@ -18,81 +18,43 @@ package com.etcoleman.util.sortedCoord;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static junit.framework.TestCase.assertEquals;
 
 /**
- * 
+ *
  */
 public class ShiftCoderTest {
 
-	@Test
-	public void interleave() {
-		
-		System.out.println(Integer.toHexString(ShiftCoder.interleave((byte)0x01,(byte)0x00)));
-		System.out.println(Integer.toHexString(ShiftCoder.interleave((byte)0x80,(byte)0x01)));
-		System.out.println(Integer.toHexString(ShiftCoder.interleave((byte)0x80,(byte)0x81)));
-		
-		System.out.println("16: " + Integer.toHexString(MortonTable.mortonTable16(0x81, 0x80)));
-		System.out.println(" 8: " + Integer.toHexString(MortonTable.mortonTable8((byte)0x81, (byte)0x80)));
+    @Test
+    public void interleave() {
 
-	}
-	
-	
-	@Test
-	public void genDecodeEven() {
-		
-		for(int i = 0; i < 256; i++){
-			//System.out.println("0x0" + Integer.toHexString(even(i)) + ",");
-			System.out.println(i + " " + Integer.toBinaryString(i) + " : 0x0" + Integer.toHexString(even(i)));
-		}
-	}
+        assertEquals(0x0002, ShiftCoder.interleave((byte) 0x01, (byte) 0x00));
+        assertEquals(0x8001, ShiftCoder.interleave((byte) 0x80, (byte) 0x01));
+        assertEquals(0xc001, ShiftCoder.interleave((byte) 0x80, (byte) 0x81));
 
-	
-	private int odd(final int value){
-		
-		int m = 0x0000ffff;
-		
-		int masked = value & m;
-		
-		int mask = 0x01;
-		
-		int r = 0;
-		int s = masked;
-		
-		for(int i = 0; i < 8; i++){
-			
-			r |= s & mask;
-			
-			mask = mask << 1;
-			s = s >> 1;
-			
-			// System.out.println("shift: " + mask + " " + s);
-		}
-		
-		System.out.println("N: " + r + " = " + Integer.toHexString(r));
-		
-		// int v = (value & 0x0001);
-		
-		int shifted = (value >> 1) & 0x7fff;
-		
-		int v = (value & 0x0001) |
-			((shifted >> 1) & 0x0002) |
-			(shifted & 0x0004) |
-			(shifted & 0x0008) |
-			(shifted & 0x0010) |
-			(shifted & 0x0020) |
-			(shifted & 0x0040) |
-			(shifted & 0x0080); 
-			
-		
-		return v;
-	}
-	
-	private int even(int value){
-		
-		int m = (0xffff & value) >> 1;
-		
-		return(odd(m));
+        assertEquals(0x0003, ShiftCoder.interleave((byte) 0x01, (byte) 0x01));
+        assertEquals(0x0001, ShiftCoder.interleave((byte) 0x00, (byte) 0x01));
 
-	}
+    }
+
+    @Test
+    public void decode() {
+
+        assertEquals(0x01, ShiftCoder.odd(0x0002));
+        assertEquals(0x00, ShiftCoder.even(0x0002));
+
+        assertEquals((byte) 0x80, ShiftCoder.odd(0x8001));
+        assertEquals(0x01, ShiftCoder.even(0x8001));
+
+        assertEquals((byte) 0x80, ShiftCoder.odd(0xc001));
+        assertEquals((byte) 0x81, ShiftCoder.even(0xc001));
+
+        assertEquals(0x01, ShiftCoder.odd(0x0003));
+        assertEquals(0x01, ShiftCoder.even(0x0001));
+
+        assertEquals(0x00, ShiftCoder.odd(0x0001));
+        assertEquals(0x01, ShiftCoder.even(0x0001));
+
+
+    }
 }
